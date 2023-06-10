@@ -1,0 +1,76 @@
+package com.atguigu.spring.aop.annoaop;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+
+/**
+ * @Description
+ * @Author hliu
+ * @Date 2023/5/29 21:19
+ * @Version 1.0
+ */
+@Aspect
+@Component
+public class LogAspect {
+    @Before(value = "execution(public int com.atguigu.spring.aop.annoaop.CalculatorImpl.*(..))")
+    public void beforeMethod(JoinPoint joinPoint) {
+        String name = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+
+        System.out.println("Logger-->前置通知，方法名称：" + name + "，参数：" + Arrays.toString(args));
+    }
+
+    @After(value = "pointcut()")
+    public void afterMethod(JoinPoint joinPoint) {
+        String name = joinPoint.getSignature().getName();
+
+        System.out.println("Logger-->后置通知，方法名称：" + name);
+    }
+
+
+    @AfterReturning(value = "execution(* com.atguigu.spring.aop.annoaop.CalculatorImpl.*(..))", returning = "result")
+    public void afterReturningMethod(JoinPoint joinPoint, Object result) {
+        String name = joinPoint.getSignature().getName();
+
+        System.out.println("Logger-->返回通知，方法名称：" + name + "，返回结果：" + result);
+    }
+
+    @AfterThrowing(value = "execution(* com.atguigu.spring.aop.annoaop.CalculatorImpl.*(..))", throwing = "ex")
+    public void afterThrowingMethod(JoinPoint joinPoint, Throwable ex) {
+        String name = joinPoint.getSignature().getName();
+
+        System.out.println("Logger-->异常通知，方法名称：" + name + "，异常信息：" + ex);
+    }
+
+    @Around(value = "execution(* com.atguigu.spring.aop.annoaop.CalculatorImpl.*(..))")
+    public Object aroundMethod(ProceedingJoinPoint joinPoint) {
+        String name = joinPoint.getSignature().getName();
+        Object[] args = joinPoint.getArgs();
+        String string = Arrays.toString(args);
+        Object result = null;
+        try {
+            System.out.println("环绕通知==目标方法之前执行");
+
+           result = joinPoint.proceed();
+
+            System.out.println("环绕通知==目标方法返回值之后");
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            System.out.println("环绕通知==目标方法出现异常后执行");
+        } finally {
+            System.out.println("环绕通知==目标方法执行完毕执行");
+        }
+
+        return result;
+    }
+
+    @Pointcut(value = "execution(* com.atguigu.spring.aop.annoaop.CalculatorImpl.*(..))")
+    public void pointcut() {
+
+    }
+
+}
